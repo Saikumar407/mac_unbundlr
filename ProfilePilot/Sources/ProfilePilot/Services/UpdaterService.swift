@@ -1,56 +1,67 @@
 import Foundation
+import Combine
 import Sparkle
 import SwiftUI
 
-/// Thin wrapper around Sparkle's standard updater controller so the rest of
-/// the app can stay unaware of the SDK. Also exposes a small SwiftUI menu item.
-final class UpdaterService: NSObject, SPUUpdaterDelegate {
+/// Sparkle 2 auto-updater integration.
+///
+/// The `SPUStandardUpdaterController` is created eagerly and kept alive for the
+/// entire process lifetime (Sparkle requires this). Its update feed, public
+/// EdDSA key and check schedule all come from `Info.plist` — see the
+/// `SUFeedURL`, `SUPublicEDKey` and `SUScheduledCheckInterval` entries — so we
+/// deliberately pass `nil` delegates. This mirrors the recommended SwiftUI
+/// pattern from Sparkle's own documentation.
+///
+/// If a future release needs callbacks (custom channel gating, feed switching,
+/// etc.) introduce a nested class conforming to `SPUUpdaterDelegate` and pass
+/// it via `updaterDelegate:` at construction time — **do not** try to set
+/// `updater.delegate` after construction; Sparkle 2.9+ removed the setter.
+final class UpdaterService: NSObject, ObservableObject {
 
     static let shared = UpdaterService()
 
     let controller: SPUStandardUpdaterController
 
-    override init() {
-        // startingUpdater: true schedules the first background check on launch.
+    /// Mirrors `SPUUpdater.canCheckForUpdates` so SwiftUI views can bind to it.
+    @Published private(set) var canCheckForUpdates: Bool = false
+
+    private override init() {
+        // Sparkle 2 API: delegates MUST be provided at construction. `self`
+        // isn't available yet (super.init hasn't run), so we pass `nil` and
+        // rely on Info.plist for configuration.
         self.controller = SPUStandardUpdaterController(
             startingUpdater: true,
             updaterDelegate: nil,
             userDriverDelegate: nil
         )
         super.init()
-        self.controller.updater.delegate = self
+
+        // Bridge Sparkle's KVO-compliant `canCheckForUpdates` into a
+        // `@Published` so SwiftUI menu items can disable themselves during
+        // an in-flight check.
+        controller.updater
+            .publisher(for: \.canCheckForUpdates)
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$canCheckForUpdates)
     }
 
-    /// Public entry point wired to the "Check for Updates…" menu item.
+    /// Menu-item entry point — wired up in `ProfilePilotApp.commands`.
     @objc func checkForUpdates(_ sender: Any?) {
         controller.checkForUpdates(sender)
-    }
-
-    var canCheckForUpdates: Bool { controller.updater.canCheckForUpdates }
-
-    // MARK: - SPUUpdaterDelegate
-
-    func feedURLString(for updater: SPUUpdater) -> String? {
-        // Prefer the value from Info.plist. Return nil to let Sparkle read
-        // SUFeedURL itself.
-        nil
-    }
-
-    func allowedChannels(for updater: SPUUpdater) -> Set<String> {
-        // We could ship "beta" and "stable" channels; for now, one channel.
-        []
     }
 }
 
 // MARK: - SwiftUI menu item
 
+/// Renders the "Check for Updates…" menu item and automatically disables it
+/// while an update check is in flight.
 struct CheckForUpdatesMenuItem: View {
-    @State private var canCheck: Bool = UpdaterService.shared.canCheckForUpdates
+    @ObservedObject private var service = UpdaterService.shared
+
     var body: some View {
         Button("Check for Updates…") {
-            UpdaterService.shared.checkForUpdates(nil)
+            service.checkForUpdates(nil)
         }
-        .disabled(!canCheck)
-        .onAppear { canCheck = UpdaterService.shared.canCheckForUpdates }
+        .disabled(!service.canCheckForUpdates)
     }
 }
