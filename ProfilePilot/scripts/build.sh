@@ -27,7 +27,7 @@ CONFIG="Release"
 
 section "Generating AppIcon assets from SVG"
 if command -v python3 >/dev/null 2>&1; then
-  python3 -m pip install --quiet cairosvg Pillow >/dev/null 2>&1 || true
+  python3 -m pip install --break-system-packages --quiet cairosvg Pillow >/dev/null 2>&1 || true
   python3 "${DIR}/generate_icons.py" || warn "Icon generation failed — the fallback default icon will be used."
 else
   warn "python3 not found — skipping icon regen. Existing PNGs will be used."
