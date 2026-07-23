@@ -1,0 +1,140 @@
+{
+  "theme": "dark",
+  "typography": {
+    "headings": {
+      "fontFamily": "Geist, 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif",
+      "weights": ["light", "medium", "semibold"],
+      "letterSpacing": "tracking-tight to tracking-tighter"
+    },
+    "body": {
+      "fontFamily": "Geist, 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif",
+      "weights": ["regular", "medium"]
+    },
+    "mono": {
+      "fontFamily": "'SF Mono', 'JetBrains Mono', 'Fira Code', monospace",
+      "weights": ["regular", "medium"]
+    },
+    "rules": [
+      "DO NOT USE Inter font.",
+      "Headings max size: text-6xl (use clamp or responsive classes sm:text-5xl lg:text-6xl).",
+      "Use mono font for keyboard shortcuts (kbd), code snippets, dates, and overlines.",
+      "Never center align default body text, left-align for readability. Center headings only if it improves hierarchy.",
+      "Ensure hierarchy gap: H1 to subtitle must not exceed 2 Tailwind steps."
+    ]
+  },
+  "colors": {
+    "background": "#000000",
+    "surface": "#0a0a0a",
+    "surface_elevated": "#141414",
+    "border": "rgba(255, 255, 255, 0.1)",
+    "text_primary": "#ffffff",
+    "text_secondary": "#a1a1aa",
+    "accent": "#ffffff",
+    "accent_glow": "rgba(255, 255, 255, 0.15)",
+    "macos_traffic_lights": {
+      "close": "#ff5f56",
+      "minimize": "#ffbd2e",
+      "maximize": "#27c93f"
+    },
+    "rules": [
+      "Follow a tasteful monochrome aesthetic with a single restrained white/silver accent (Apple-native feel).",
+      "Use deep dark colors for background. Avoid generic gradients; use solid darks with subtle radial light glows.",
+      "Ensure WCAG AA or APCA compliant contrast ratios for text."
+    ]
+  },
+  "layouts": {
+    "hero": "Massive typography, left-aligned or centered, followed by a glowing macOS window mockup.",
+    "features": "Bento-style grid ('Tetris' grid mode). Use gap-6 or gap-8. Span logic to create asymmetry.",
+    "comparison": "Side-by-side grid-cols-1 md:grid-cols-2. Windows/Standard macOS (messy, chaotic) vs ProfilePilot (clean, organized).",
+    "rules": [
+      "Use generous spacing (p-12, p-16) for sections.",
+      "Mobile-first responsive grids.",
+      "Optical alignment over geometrical alignment.",
+      "Grid items must be direct children of the grid container."
+    ]
+  },
+  "visual_enhancers": {
+    "glassmorphism": "Use backdrop-blur-xl bg-black/60 with a 1px border-white/10 for the sticky header and the interactive menu bar. NEVER use fully transparent backgrounds for overlays.",
+    "textures": "Subtle noise/grain overlay on the page to add tactile depth and prevent flat black spaces.",
+    "lighting": "Use subtle radial-gradients for glowing backgrounds behind hero and key features, simulating studio lighting.",
+    "macos_chrome": "Use real macOS window chrome mockups (traffic light dots, smooth rounded corners: rounded-xl or rounded-2xl).",
+    "keyboard_shortcuts": "Style <kbd> tags as physical keys with inset shadows, border-b-2, and subtle rounded corners to mimic tactile depth (e.g. ⌥⌘L)."
+  },
+  "components": {
+    "header": {
+      "description": "Sticky nav with glassmorphism. Logo + Links + Primary CTA.",
+      "rules": "z-50, backdrop-blur-xl, bg-black/60, bottom border border-white/10."
+    },
+    "hero": {
+      "description": "Text: 'Fix macOS's broken multi-profile Chrome experience'. Subtitle explaining <100ms startup and native SwiftUI.",
+      "rules": "Include a mock macOS window showcasing the product. Use max-overlay opacity rules if using background images."
+    },
+    "interactive_demo": {
+      "description": "A live interactive demo pane resembling the macOS menu bar.",
+      "rules": "Must be clickable. When clicked, opens a popover showing the 'AI Workspace' search (e.g., typing 'Laravel' -> launch stack). Use Framer Motion for the popover entrance."
+    },
+    "architecture_section": {
+      "description": "Explains bundle wrapper technique, LaunchServices, Accessibility APIs.",
+      "rules": "Use mono font for technical terms. Show pseudo-code or terminal aesthetics (Retro-Futurism/Terminal look but clean)."
+    },
+    "downloads": {
+      "description": "macOS .dmg placeholder + 'Build from source' for Xcode.",
+      "rules": "Use strong pill-shaped CTAs. Provide clear versioning text."
+    },
+    "roadmap": {
+      "description": "Vertical timeline of features.",
+      "rules": "Use a subtle left border line and nodes. Mono font for dates."
+    },
+    "security": {
+      "description": "Privacy manifesto: Offline, no telemetry, no history access.",
+      "rules": "Minimalist monochrome icons from lucide-react."
+    },
+    "faq": {
+      "description": "Shadcn accordion component.",
+      "rules": "Customize to match dark theme (white/10 borders, white text on hover)."
+    },
+    "footer": {
+      "description": "Links to GitHub, docs, changelog.",
+      "rules": "Generous padding (py-24). Large 'ProfilePilot' wordmark."
+    }
+  },
+  "media": {
+    "image_urls": {
+      "background_texture": {
+        "url": "https://images.pexels.com/photos/13026928/pexels-photo-13026928.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Abstract dark 3D glass texture. Use with very low opacity (10-20%) and blend-mode as a background for the hero or global wrapper."
+      },
+      "laptop_context": {
+        "url": "https://images.pexels.com/photos/11621727/pexels-photo-11621727.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Dark sleek laptop mockup. Can be used in the Architecture or Problem vs Solution section to add cinematic tech feel."
+      }
+    },
+    "icons": "Use lucide-react for all standard icons. Do NOT use emojis."
+  },
+  "motion": {
+    "rules": [
+      "Framer motion for subtle staggered entrances.",
+      "Hover lifts (-translate-y-1) for bento cards.",
+      "Interactive menu bar popover must animate smoothly (scale and fade in).",
+      "Respect prefers-reduced-motion."
+    ]
+  },
+  "testing": {
+    "rules": [
+      "All interactive and key informational elements MUST include a data-testid attribute.",
+      "Convention: kebab-case, role-based. Example: data-testid='hero-download-button'"
+    ]
+  },
+  "universal_guidelines_for_main_agent": [
+    "You are using React with standard JavaScript (.js/.jsx), NOT TypeScript (.tsx). Adapt all code and Shadcn components accordingly.",
+    "You tend to converge toward generic outputs. Make creative, distinctive frontends that surprise and delight (think Raycast + Linear).",
+    "DO NOT use dark colors as standard gradients. Use solid dark colors with subtle radial light glows if needed.",
+    "Create depth through layered design elements with z-index hierarchy and glassmorphism (12-24px blur).",
+    "You MUST NOT apply universal transition (transition: all). Use specific properties.",
+    "You MUST NOT center align the app container in App.css (no text-align: center).",
+    "Use modern pill-shaped or sharp rounded-md buttons with clear focus states.",
+    "NEVER use emojis for icons. Use lucide-react.",
+    "Every interaction needs micro-animations (hover states, focus).",
+    "Add data-testid attributes to all interactive elements."
+  ]
+}
