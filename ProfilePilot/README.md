@@ -116,9 +116,12 @@ application is in the repo:
 - ✅ CI-generated appcast entry (`build/appcast-entry.xml`)
 
 ### Build automation
+- ✅ `scripts/bootstrap.sh` — one-shot Mac environment setup.
+- ✅ `scripts/dev-preview.sh` — **unsigned dev preview build** (`.app` + plain `.dmg`, no Apple Developer account required).
 - ✅ `scripts/build.sh` · `sign.sh` · `notarize.sh` · `create-dmg.sh` · `package.sh` · `release.sh`
-- ✅ GitHub Actions: [`.github/workflows/ci.yml`](.github/workflows/ci.yml) (build + test on every PR)
-- ✅ GitHub Actions: [`.github/workflows/release.yml`](.github/workflows/release.yml) (tag → signed release)
+- ✅ `scripts/audit.sh` + `scripts/smoke-test.sh`
+- ✅ GitHub Actions: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) (build + test on every PR)
+- ✅ GitHub Actions: [`.github/workflows/release.yml`](../.github/workflows/release.yml) (tag → signed release)
 
 ### Distribution
 - ✅ GitHub Releases pipeline

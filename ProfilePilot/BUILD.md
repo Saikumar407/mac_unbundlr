@@ -27,6 +27,26 @@ xcodegen --version
 
 ## Quick build (unsigned, dev only)
 
+**Fastest path** — no Apple Developer account required, ad-hoc signed, produces
+a `.app` and a plain `.dmg` you can double-click on your own Mac (or send to a
+friend willing to right-click → Open the first time):
+
+```bash
+./scripts/dev-preview.sh          # → build/dev/ProfilePilot.app + build/ProfilePilot-dev.dmg
+./scripts/dev-preview.sh --run    # …and open it immediately
+```
+
+The output is **not** distributable publicly — Gatekeeper will warn every user
+because it's not signed with a Developer ID and not notarised. Use this for
+your own testing, screencasts, and early feedback. When ready to ship, use
+`./scripts/release.sh` (needs your Developer ID cert).
+
+---
+
+## Manual quick build
+
+If you'd rather drive Xcode directly:
+
 ```bash
 git clone https://github.com/YOURUSER/ProfilePilot.git
 cd ProfilePilot
@@ -42,8 +62,8 @@ swift build -c release
 open .build/release/ProfilePilot
 ```
 
-Note: SPM builds don't produce a proper `.app` bundle — use Xcode / `scripts/build.sh`
-for anything you plan to distribute.
+Note: SPM builds don't produce a proper `.app` bundle — use Xcode / `scripts/dev-preview.sh`
+for anything you plan to launch as an app.
 
 ---
 
