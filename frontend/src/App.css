@@ -1,34 +1,78 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* Do not add text-align: center on the App container */
+.App {
+  min-height: 100vh;
+  background: #050505;
+  color: #f5f5f5;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+/* Grain overlay */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/></svg>");
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+/* Radial glow behind hero */
+.hero-glow {
+  position: absolute;
+  inset: -20% -10% auto -10%;
+  height: 720px;
+  background: radial-gradient(60% 55% at 50% 45%, rgba(255,255,255,0.12), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
 }
 
-.App-link {
-    color: #61dafb;
+/* Kbd caps */
+kbd {
+  font-family: "SF Mono", "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+  padding: 2px 6px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.16);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  color: #f5f5f5;
+  line-height: 1;
+  display: inline-block;
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,0.35);
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+/* mac window chrome */
+.mac-window {
+  border-radius: 14px;
+  background: linear-gradient(180deg, #0d0d0f 0%, #08080a 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  overflow: hidden;
+  box-shadow: 0 40px 80px -20px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.03) inset;
 }
+.mac-titlebar {
+  height: 34px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.02);
+}
+.mac-dot { width: 12px; height: 12px; border-radius: 50%; }
+.mac-dot.red { background: #ff5f56; }
+.mac-dot.yellow { background: #ffbd2e; }
+.mac-dot.green { background: #27c93f; }
+
+/* Tetris/bento grid utilities handled via tailwind classes */
+
+/* Focus ring override */
+*:focus-visible {
+  outline: 2px solid rgba(255,255,255,0.5);
+  outline-offset: 2px;
+}
+
+/* Selection */
+::selection { background: rgba(255,255,255,0.85); color: #050505; }
+
+/* smooth scroll */
+html { scroll-behavior: smooth; }

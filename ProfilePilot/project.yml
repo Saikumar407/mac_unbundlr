@@ -1,0 +1,65 @@
+name: ProfilePilot
+options:
+  bundleIdPrefix: com.profilepilot
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+    ENABLE_HARDENED_RUNTIME: YES
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: ""
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+
+targets:
+  ProfilePilot:
+    type: application
+    platform: macOS
+    sources:
+      - path: Sources/ProfilePilot
+    resources:
+      - Sources/ProfilePilot/Resources/Assets.xcassets
+    info:
+      path: Sources/ProfilePilot/Resources/Info.plist
+      properties:
+        CFBundleDisplayName: ProfilePilot
+        CFBundleShortVersionString: "0.1.0"
+        CFBundleVersion: "1"
+        LSMinimumSystemVersion: "14.0"
+        LSApplicationCategoryType: public.app-category.productivity
+        NSHumanReadableCopyright: "© 2026 ProfilePilot"
+        NSAppleEventsUsageDescription: "ProfilePilot uses Apple Events to launch and arrange your workspace apps."
+        NSAppleScriptEnabled: NO
+        LSUIElement: false
+    entitlements:
+      path: Sources/ProfilePilot/Resources/ProfilePilot.entitlements
+      properties:
+        com.apple.security.app-sandbox: false
+        com.apple.security.automation.apple-events: true
+        com.apple.security.temporary-exception.apple-events:
+          - com.apple.finder
+          - com.apple.systemevents
+
+  ProfilePilotTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests/ProfilePilotTests
+    dependencies:
+      - target: ProfilePilot
+
+schemes:
+  ProfilePilot:
+    build:
+      targets:
+        ProfilePilot: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - ProfilePilotTests
