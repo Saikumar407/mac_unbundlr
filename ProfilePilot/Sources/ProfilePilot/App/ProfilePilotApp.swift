@@ -25,6 +25,9 @@ struct ProfilePilotApp: App {
         .windowResizability(.contentSize)
         .commands {
             CommandGroup(replacing: .newItem) { }
+            CommandGroup(after: .appInfo) {
+                CheckForUpdatesMenuItem()
+            }
         }
 
         Settings {

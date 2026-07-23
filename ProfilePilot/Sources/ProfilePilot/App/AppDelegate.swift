@@ -12,6 +12,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Register any hotkeys the user has previously configured.
         AppState.shared.hotkeys.rebindAll(from: AppState.shared.workspaces)
+
+        // Warm Sparkle so the first update check fires per SUScheduledCheckInterval.
+        _ = UpdaterService.shared
     }
 
     func applicationWillTerminate(_ notification: Notification) {

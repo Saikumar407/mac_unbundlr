@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+     xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle"
+     xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>ProfilePilot Updates</title>
+    <link>https://profilepilot.app/appcast.xml</link>
+    <description>Native macOS workspace + browser-profile launcher</description>
+    <language>en</language>
+
+    <!--
+      Insert new <item> blocks at the top of the channel.
+      scripts/package.sh writes ready-to-paste stubs to build/appcast-entry.xml.
+    -->
+
+    <item>
+      <title>Version 0.1.0</title>
+      <pubDate>Thu, 23 Jan 2026 09:00:00 +0000</pubDate>
+      <sparkle:version>202601230900</sparkle:version>
+      <sparkle:shortVersionString>0.1.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[
+        <ul>
+          <li>Initial preview release</li>
+          <li>Chrome / Edge / Brave / Chromium profile auto-detection</li>
+          <li>Per-profile <code>.app</code> wrapper generator</li>
+          <li>Workspaces + global hotkeys</li>
+          <li>Menu-bar mode</li>
+          <li>AI Workspace via companion API</li>
+        </ul>
+      ]]></description>
+      <enclosure
+        url="https://github.com/YOURUSER/ProfilePilot/releases/download/v0.1.0/ProfilePilot-0.1.0.zip"
+        length="0"
+        type="application/octet-stream"
+        sparkle:edSignature="REPLACE_ME_FROM_build/sparkle-signature.txt" />
+    </item>
+
+  </channel>
+</rss>

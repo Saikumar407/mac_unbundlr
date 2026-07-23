@@ -4,16 +4,29 @@ options:
   deploymentTarget:
     macOS: "14.0"
   createIntermediateGroups: true
+  transitivelyLinkDependencies: true
+
+packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: "2.6.0"
 
 settings:
   base:
     SWIFT_VERSION: "5.9"
     MACOSX_DEPLOYMENT_TARGET: "14.0"
     ENABLE_HARDENED_RUNTIME: YES
-    CODE_SIGN_STYLE: Automatic
+    CODE_SIGN_STYLE: Manual
     DEVELOPMENT_TEAM: ""
     MARKETING_VERSION: "0.1.0"
     CURRENT_PROJECT_VERSION: "1"
+    OTHER_CODE_SIGN_FLAGS: "--timestamp"
+    ENABLE_APP_SANDBOX: NO
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+    # Universal Binary
+    ARCHS: "$(ARCHS_STANDARD)"
+    ONLY_ACTIVE_ARCH[config=Debug]: YES
+    ONLY_ACTIVE_ARCH[config=Release]: NO
 
 targets:
   ProfilePilot:
@@ -21,25 +34,35 @@ targets:
     platform: macOS
     sources:
       - path: Sources/ProfilePilot
+    dependencies:
+      - package: Sparkle
     resources:
       - Sources/ProfilePilot/Resources/Assets.xcassets
     info:
       path: Sources/ProfilePilot/Resources/Info.plist
       properties:
         CFBundleDisplayName: ProfilePilot
-        CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "1"
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         LSMinimumSystemVersion: "14.0"
         LSApplicationCategoryType: public.app-category.productivity
-        NSHumanReadableCopyright: "© 2026 ProfilePilot"
+        NSHumanReadableCopyright: "© 2026 ProfilePilot Contributors — MIT licensed."
         NSAppleEventsUsageDescription: "ProfilePilot uses Apple Events to launch and arrange your workspace apps."
         NSAppleScriptEnabled: NO
         LSUIElement: false
+        NSHighResolutionCapable: true
+        # Sparkle auto-update settings
+        SUFeedURL: "https://profilepilot.app/appcast.xml"
+        SUEnableAutomaticChecks: true
+        SUAutomaticallyUpdate: false
+        SUScheduledCheckInterval: 86400
+        SUPublicEDKey: "REPLACE_WITH_YOUR_BASE64_ED_PUBLIC_KEY"
     entitlements:
       path: Sources/ProfilePilot/Resources/ProfilePilot.entitlements
       properties:
         com.apple.security.app-sandbox: false
         com.apple.security.automation.apple-events: true
+        com.apple.security.files.user-selected.read-write: true
         com.apple.security.temporary-exception.apple-events:
           - com.apple.finder
           - com.apple.systemevents
@@ -63,3 +86,7 @@ schemes:
       config: Debug
       targets:
         - ProfilePilotTests
+    archive:
+      config: Release
+    profile:
+      config: Release
