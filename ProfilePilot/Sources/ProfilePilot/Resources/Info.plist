@@ -24,7 +24,5 @@
     <key>SUEnableAutomaticChecks</key><true/>
     <key>SUAutomaticallyUpdate</key><false/>
     <key>SUScheduledCheckInterval</key><integer>86400</integer>
-    <!-- Replace with the base64 public key printed by `Sparkle/bin/generate_keys` -->
-    <key>SUPublicEDKey</key><string>REPLACE_WITH_YOUR_BASE64_ED_PUBLIC_KEY</string>
 </dict>
 </plist>

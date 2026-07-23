@@ -56,7 +56,6 @@ targets:
         SUEnableAutomaticChecks: true
         SUAutomaticallyUpdate: false
         SUScheduledCheckInterval: 86400
-        SUPublicEDKey: "REPLACE_WITH_YOUR_BASE64_ED_PUBLIC_KEY"
     entitlements:
       path: Sources/ProfilePilot/Resources/ProfilePilot.entitlements
       properties:
