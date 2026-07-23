@@ -49,7 +49,7 @@ echo
 
 # 1. Icons + Xcode project
 section "Regenerating icons + Xcode project"
-python3 -m pip install --quiet cairosvg Pillow >/dev/null 2>&1 || true
+python3 -m pip install --break-system-packages --quiet cairosvg Pillow >/dev/null 2>&1 || true
 python3 "${DIR}/generate_icons.py" || warn "Icon generation skipped."
 if command -v xcodegen >/dev/null 2>&1; then
   ( cd "${REPO_ROOT}" && xcodegen generate )

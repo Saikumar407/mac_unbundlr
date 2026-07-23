@@ -38,7 +38,7 @@ jobs:
         run: |
           chmod +x scripts/*.sh
           brew install xcodegen create-dmg xcbeautify librsvg
-          python3 -m pip install --upgrade pip cairosvg Pillow
+          python3 -m pip install --break-system-packages --upgrade pip cairosvg Pillow
 
       - name: Import Developer ID certificate
         env:

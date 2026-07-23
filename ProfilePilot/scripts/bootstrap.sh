@@ -41,7 +41,7 @@ fi
 
 section "Python (for icon generation)"
 require_cmd python3
-python3 -m pip install --quiet --upgrade pip cairosvg Pillow >/dev/null
+python3 -m pip install --break-system-packages --quiet --upgrade pip cairosvg Pillow >/dev/null
 ok "Icon-gen deps present"
 
 section "scripts/.env.local"
