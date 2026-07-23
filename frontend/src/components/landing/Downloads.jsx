@@ -16,9 +16,28 @@ export default function Downloads() {
   const [copied, setCopied] = useState(false);
 
   function copy() {
-    navigator.clipboard.writeText(cmd);
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(cmd).catch(() => fallbackCopy(cmd));
+      } else {
+        fallbackCopy(cmd);
+      }
+    } catch {
+      fallbackCopy(cmd);
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
+  }
+
+  function fallbackCopy(text) {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); } catch { /* noop */ }
+    document.body.removeChild(ta);
   }
 
   return (
