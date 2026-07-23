@@ -22,7 +22,7 @@ final class HotkeyManager {
         for ws in workspaces {
             guard let spec = ws.hotkey else { continue }
             bind(spec: spec) { [weak self] in
-                guard let self else { return }
+                guard self != nil else { return }
                 Task { @MainActor in
                     AppState.shared.launch(ws)
                 }

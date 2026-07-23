@@ -22,7 +22,7 @@ struct ProfileDetector {
     /// `profile.info_cache.<dir>` map whose entries carry the human display name.
     private func chromiumProfiles(browser: Browser) -> [BrowserProfile] {
         let localStateURL = browser.userDataDirectory.appending(path: "Local State", directoryHint: .notDirectory)
-        guard FileManager.default.isReadableFile(atPath: localStateURL.path()) else {
+        guard FileManager.default.isReadableFile(atPath: localStateURL.path(percentEncoded: false)) else {
             return []
         }
         guard let data = try? Data(contentsOf: localStateURL),
