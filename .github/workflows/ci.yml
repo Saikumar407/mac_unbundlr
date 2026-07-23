@@ -3,8 +3,18 @@ name: CI
 on:
   push:
     branches: [main]
+    paths:
+      - "ProfilePilot/**"
+      - ".github/workflows/ci.yml"
   pull_request:
     branches: [main]
+    paths:
+      - "ProfilePilot/**"
+      - ".github/workflows/ci.yml"
+
+defaults:
+  run:
+    working-directory: ProfilePilot
 
 jobs:
   build-test:
@@ -21,8 +31,14 @@ jobs:
         with:
           xcode-version: latest-stable
 
-      - name: Install XcodeGen + xcbeautify
-        run: brew install xcodegen xcbeautify
+      - name: Bootstrap toolchain
+        run: |
+          chmod +x scripts/*.sh
+          brew install xcodegen xcbeautify librsvg create-dmg
+          python3 -m pip install --upgrade pip cairosvg Pillow
+
+      - name: Generate app icons
+        run: python3 scripts/generate_icons.py
 
       - name: Generate Xcode project
         run: xcodegen generate

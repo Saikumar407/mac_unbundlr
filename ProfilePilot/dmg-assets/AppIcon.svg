@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ProfilePilot AppIcon — 1024×1024 source.
+  Follows Apple HIG: rounded-square canvas (implicit via macOS icon mask),
+  metaphor: layered "profile plates" stacked with a light source at top-right.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Charcoal gradient background -->
+    <radialGradient id="bg" cx="70%" cy="20%" r="90%">
+      <stop offset="0%"   stop-color="#3a3a44"/>
+      <stop offset="45%"  stop-color="#141419"/>
+      <stop offset="100%" stop-color="#050506"/>
+    </radialGradient>
+    <!-- Soft light for tiles -->
+    <linearGradient id="tileTop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="tileFront" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f6f6f8"/>
+      <stop offset="1" stop-color="#c8c8d0"/>
+    </linearGradient>
+    <linearGradient id="tileMid" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7c7c84"/>
+      <stop offset="1" stop-color="#4a4a52"/>
+    </linearGradient>
+    <linearGradient id="tileBack" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4a4a52"/>
+      <stop offset="1" stop-color="#22222a"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="10"/>
+      <feOffset dx="0" dy="8"/>
+      <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.35 0"/>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- Sparkle glow (top-right ornament) -->
+    <radialGradient id="spark" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- macOS icon canvas: 1024×1024 with corners handled by the OS mask.
+       We paint a full-bleed rect and let Xcode's AppIcon mask do the rounding.
+       We also draw our own subtle rounded rect so previews look right. -->
+  <rect x="0" y="0" width="1024" height="1024" rx="230" ry="230" fill="url(#bg)"/>
+
+  <!-- Faint dot grid -->
+  <g fill="#ffffff" fill-opacity="0.04">
+    <circle cx="120" cy="900" r="4"/><circle cx="180" cy="900" r="4"/><circle cx="240" cy="900" r="4"/>
+    <circle cx="120" cy="820" r="4"/><circle cx="180" cy="820" r="4"/>
+  </g>
+
+  <!-- Three stacked profile "tiles" — perspective-lite, brand mark of the app -->
+  <g filter="url(#shadow)">
+    <!-- BACK tile -->
+    <g transform="translate(232 250) rotate(-10)">
+      <rect x="0" y="0" width="560" height="360" rx="72" fill="url(#tileBack)"/>
+      <rect x="0" y="0" width="560" height="360" rx="72" fill="url(#tileTop)"/>
+      <rect x="0" y="0" width="560" height="360" rx="72" fill="none" stroke="#ffffff" stroke-opacity="0.05" stroke-width="2"/>
+    </g>
+    <!-- MID tile -->
+    <g transform="translate(200 330) rotate(-4)">
+      <rect x="0" y="0" width="620" height="380" rx="80" fill="url(#tileMid)"/>
+      <rect x="0" y="0" width="620" height="380" rx="80" fill="url(#tileTop)"/>
+      <rect x="0" y="0" width="620" height="380" rx="80" fill="none" stroke="#ffffff" stroke-opacity="0.08" stroke-width="2"/>
+    </g>
+    <!-- FRONT tile — carries the ProfilePilot glyph -->
+    <g transform="translate(180 420)">
+      <rect x="0" y="0" width="660" height="400" rx="88" fill="url(#tileFront)"/>
+      <rect x="0" y="0" width="660" height="400" rx="88" fill="url(#tileTop)"/>
+      <rect x="0" y="0" width="660" height="400" rx="88" fill="none" stroke="#000000" stroke-opacity="0.08" stroke-width="2"/>
+
+      <!-- Command / sparkles glyph -->
+      <g transform="translate(330 210)" fill="none">
+        <!-- Command loops (⌘ inspired) -->
+        <g stroke="#141419" stroke-width="22" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M -110,-40  a 42 42 0 1 1 42 42  L -68 42  a 42 42 0 1 1 -42 -42 Z"/>
+          <path d="M  110,-40  a 42 42 0 1 0 -42 42  L  68 42  a 42 42 0 1 0  42 -42 Z"/>
+          <path d="M -68 -40 L 68 -40  M -68 42 L 68 42"/>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- Sparkle ornaments (subtle, top-right and bottom-left) -->
+  <g>
+    <circle cx="820" cy="220" r="90" fill="url(#spark)"/>
+    <g stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.85">
+      <line x1="820" y1="180" x2="820" y2="140"/>
+      <line x1="820" y1="260" x2="820" y2="300"/>
+      <line x1="780" y1="220" x2="740" y2="220"/>
+      <line x1="860" y1="220" x2="900" y2="220"/>
+    </g>
+  </g>
+</svg>

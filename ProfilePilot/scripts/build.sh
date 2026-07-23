@@ -25,6 +25,14 @@ fi
 CONFIG="Release"
 [[ "$MODE" == "debug" ]] && CONFIG="Debug"
 
+section "Generating AppIcon assets from SVG"
+if command -v python3 >/dev/null 2>&1; then
+  python3 -m pip install --quiet cairosvg Pillow >/dev/null 2>&1 || true
+  python3 "${DIR}/generate_icons.py" || warn "Icon generation failed — the fallback default icon will be used."
+else
+  warn "python3 not found — skipping icon regen. Existing PNGs will be used."
+fi
+
 section "Regenerating Xcode project via XcodeGen"
 if command -v xcodegen >/dev/null 2>&1; then
   ( cd "${REPO_ROOT}" && xcodegen generate )
@@ -62,16 +70,8 @@ ok "Archive at ${ARCHIVE_PATH}"
 section "Exporting .app"
 mkdir -p "${EXPORT_DIR}"
 EXPORT_PLIST="${BUILD_DIR}/ExportOptions.plist"
-cat > "${EXPORT_PLIST}" <<PLIST
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0"><dict>
-  <key>method</key><string>developer-id</string>
-  <key>signingStyle</key><string>manual</string>
-  <key>teamID</key><string>${DEVELOPMENT_TEAM:-XXXXXXXXXX}</string>
-  <key>destination</key><string>export</string>
-</dict></plist>
-PLIST
+sed "s/@@DEVELOPMENT_TEAM@@/${DEVELOPMENT_TEAM:-XXXXXXXXXX}/g" \
+  "${REPO_ROOT}/ExportOptions.plist.template" > "${EXPORT_PLIST}"
 
 if ! xcodebuild -exportArchive \
      -archivePath "${ARCHIVE_PATH}" \

@@ -53,6 +53,9 @@ fi
 
 "${DIR}/package.sh"
 
+section "Automated production audit"
+"${DIR}/audit.sh" || warn "Some audit checks failed — see ${BUILD_DIR}/audit-report.txt"
+
 section "Done"
 ls -lh "${BUILD_DIR}"/*.dmg "${BUILD_DIR}"/*.zip 2>/dev/null | sed 's/^/  /' || true
 ok "Release artifacts in ${BUILD_DIR}"

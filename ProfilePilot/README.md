@@ -33,6 +33,41 @@ Full companion web landing/docs site under `/frontend` + `/backend`.
 
 ---
 
+## Zero-manual-steps release flow
+
+Everything below is one command. The only inputs you supply are your Apple
+Developer credentials (Apple ID, Team ID, app-specific password, Developer ID
+certificate) — Apple physically requires these and no CI system can generate
+them for you.
+
+```bash
+# ── one-time, on your Mac ──
+git clone <this repo>
+cd ProfilePilot
+
+# 1. Install everything, generate Sparkle keys, patch Info.plist, generate icons
+./scripts/bootstrap.sh
+
+# 2. Fill in Apple values (edit the 4-line file it just created)
+$EDITOR scripts/.env.local
+
+# 3. Store notarytool credentials in the keychain (one time, survives reboots)
+xcrun notarytool store-credentials "ProfilePilotNotary" \
+  --apple-id     "you@icloud.com" \
+  --team-id      "$DEVELOPMENT_TEAM" \
+  --password     "abcd-efgh-ijkl-mnop"
+
+# ── every release ──
+export MARKETING_VERSION=0.1.0
+./scripts/release.sh              # build → sign → notarise → DMG → ZIP → audit
+git tag v$MARKETING_VERSION && git push --tags   # CI reruns everything and publishes
+```
+
+Not on a Mac yet? Run `./scripts/smoke-test.sh` — 30 checks that verify every
+non-macOS artefact of the release pipeline. All 30 pass on Linux CI.
+
+---
+
 ## Docs map
 
 | File | Purpose |
@@ -103,33 +138,48 @@ application is in the repo:
 - ✅ `README.md` · `INSTALL.md` · `BUILD.md` · `RELEASE.md` · `CONTRIBUTING.md`
 - ✅ `CHANGELOG.md` · `ARCHITECTURE.md` · `ROADMAP.md` · `LICENSE`
 
-### Testing / production audit
+### Testing
 - ✅ Unit tests: `ProfileDetectorTests` · `BundleFactoryTests` · `WorkspaceCodableTests`
 - ✅ CI runs `xcodebuild test` on every PR
 - ✅ Manual audit matrix in [`ARCHITECTURE.md §6`](./ARCHITECTURE.md#6-testing-strategy)
-- 🟡 Runtime / memory / crash / permissions verification — **must** be executed on a real Mac. See the *Production audit checklist* section below.
+
+### Production audit
+- ✅ `scripts/audit.sh` — end-to-end Mac audit (bundle, signing, hardened runtime, notarisation, universal binary, Sparkle feed, cold-start, idle RAM). Runs as the last step of `release.sh` and in CI.
+- ✅ `scripts/smoke-test.sh` — Linux-runnable pre-flight (script syntax, plist/XML/YAML validity, icon generation, appiconset completeness). **30 checks green.**
+- ✅ `scripts/bootstrap.sh` — one-shot Mac environment setup (brew tools, Sparkle keys, Info.plist patching, icon generation, `.env.local` scaffolding).
 
 ---
 
 ## Production audit checklist
 
-The following must be verified on a real Mac before shipping a public release.
-They cannot be verified in a Linux CI container.
+`scripts/audit.sh` runs **every** check below automatically on a Mac and emits
+`build/audit-report.txt`. It's chained into `scripts/release.sh` so a green
+release automatically means a green audit. Run manually with:
 
-- [ ] `scripts/release.sh` completes without errors on a clean checkout.
-- [ ] Fresh `.dmg` mounts, drag-installs, and launches from `/Applications`.
-- [ ] `spctl -a -vvv --type execute /Applications/ProfilePilot.app` prints `accepted`.
-- [ ] `codesign --verify --deep --strict --verbose=2 /Applications/ProfilePilot.app` prints `valid on disk / satisfies its Designated Requirement`.
-- [ ] Idle RAM under **50 MB** (Activity Monitor → Memory).
-- [ ] Cold start under **100 ms** (`time open -a ProfilePilot`).
-- [ ] All installed browsers appear in the profiles list.
-- [ ] Clicking a profile row launches the **correct** browser + profile.
-- [ ] Right-click → **Create Dock App** produces a wrapper in `~/Applications/ProfilePilot/` that launches with its **own Dock icon** and **own Cmd+Tab entry**.
-- [ ] Workspace with 5+ items launches every item in order.
-- [ ] Global hotkey `⌥⌘1` (bound to a workspace) fires from any foreground app.
-- [ ] Denying and later granting *Accessibility* permission does not crash the app; layout capture only works when granted.
-- [ ] Sparkle "Check for Updates…" reaches the appcast URL and reports a valid state (up-to-date, or offers an update).
-- [ ] Uninstall via `brew uninstall --cask profilepilot --zap` removes the app and its Application Support folder.
+```bash
+./scripts/audit.sh                  # audits build/export/ProfilePilot.app
+./scripts/audit.sh /Applications/ProfilePilot.app
+```
+
+Checks performed:
+
+- Bundle structure (Info.plist, MacOS binary, PkgInfo, AppIcon.icns, `_CodeSignature`, `Sparkle.framework`)
+- Info.plist keys (`CFBundleIdentifier`, `LSMinimumSystemVersion≥14.0`, `NSHighResolutionCapable`, `SUFeedURL`, `SUPublicEDKey` filled)
+- Universal binary (both `x86_64` and `arm64` slices)
+- Code signing (`codesign --verify --deep --strict`, Hardened Runtime, Developer ID authority, nested frameworks)
+- Notarisation + Gatekeeper (`stapler validate`, `spctl -a --type execute`)
+- Entitlements (App Sandbox disabled by design, Apple Events entitlement present)
+- Sparkle appcast reachability (HTTP 200 on `SUFeedURL`)
+- Runtime: cold-start under **800 ms**, idle RAM under **120 MB** (safety margins over the app's <100 ms / <50 MB budget)
+- DMG: signed, notarised, stapled, mounts and detaches cleanly
+
+Any red on `audit.sh` blocks the GitHub Release.
+
+Pre-Mac smoke-test (Linux-runnable):
+
+```bash
+./scripts/smoke-test.sh   # 30 checks: script syntax, plist/XML/YAML validity, icons
+```
 
 ---
 

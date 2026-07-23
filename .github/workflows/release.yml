@@ -1,0 +1,147 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+# Required repository secrets (see ProfilePilot/RELEASE.md):
+#   DEVELOPER_ID_APPLICATION       — "Developer ID Application: Your Name (TEAMID1234)"
+#   DEVELOPMENT_TEAM               — 10-char team id
+#   APPLE_ID                       — Apple ID email
+#   APPLE_APP_SPECIFIC_PASSWORD    — app-specific password from appleid.apple.com
+#   MAC_CERTIFICATES_P12_BASE64    — base64 of your exported Developer ID .p12
+#   MAC_CERTIFICATES_P12_PASSWORD  — password protecting the .p12
+#   SPARKLE_ED_PRIVATE_KEY         — Sparkle EdDSA private key (contents of generate_keys -x)
+
+defaults:
+  run:
+    working-directory: ProfilePilot
+
+jobs:
+  release:
+    name: Build, sign, notarise, publish
+    runs-on: macos-14
+    timeout-minutes: 60
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Bootstrap toolchain
+        run: |
+          chmod +x scripts/*.sh
+          brew install xcodegen create-dmg xcbeautify librsvg
+          python3 -m pip install --upgrade pip cairosvg Pillow
+
+      - name: Import Developer ID certificate
+        env:
+          P12_BASE64: ${{ secrets.MAC_CERTIFICATES_P12_BASE64 }}
+          P12_PASSWORD: ${{ secrets.MAC_CERTIFICATES_P12_PASSWORD }}
+        run: |
+          set -euo pipefail
+          echo "$P12_BASE64" | base64 -d > /tmp/dev-id.p12
+          security create-keychain -p ci ci.keychain
+          security list-keychains -d user -s ci.keychain login.keychain
+          security default-keychain -s ci.keychain
+          security unlock-keychain -p ci ci.keychain
+          security import /tmp/dev-id.p12 -k ci.keychain \
+            -P "$P12_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k ci ci.keychain
+          rm -f /tmp/dev-id.p12
+          security find-identity -p codesigning -v
+
+      - name: Configure notarytool credentials
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM }}
+        run: |
+          xcrun notarytool store-credentials "ProfilePilotNotary" \
+            --apple-id "$APPLE_ID" \
+            --team-id "$DEVELOPMENT_TEAM" \
+            --password "$APPLE_APP_SPECIFIC_PASSWORD"
+
+      - name: Extract version from tag
+        id: ver
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+
+      - name: Generate icons + resolve Sparkle
+        run: |
+          python3 scripts/generate_icons.py
+          xcodegen generate
+          xcodebuild -project ProfilePilot.xcodeproj -scheme ProfilePilot \
+            -resolvePackageDependencies
+
+      - name: Bake Sparkle public key into Info.plist
+        env:
+          SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
+        run: |
+          if [[ -n "$SPARKLE_ED_PRIVATE_KEY" ]]; then
+            echo "$SPARKLE_ED_PRIVATE_KEY" > /tmp/priv.key
+            # Locate sign_update / generate_keys copied into DerivedData by the resolver.
+            SP_DIR="$(find "$HOME/Library/Developer/Xcode/DerivedData" -type d -path '*/artifacts/sparkle/Sparkle/bin' 2>/dev/null | head -n1)"
+            [[ -n "$SP_DIR" ]] || SP_DIR="$(find "$HOME/Library/Developer/Xcode/DerivedData" -type f -name sign_update -exec dirname {} \; 2>/dev/null | head -n1)"
+            if [[ -n "$SP_DIR" ]]; then
+              mkdir -p Sparkle/bin
+              cp -f "$SP_DIR"/sign_update Sparkle/bin/ 2>/dev/null || true
+              cp -f "$SP_DIR"/generate_keys Sparkle/bin/ 2>/dev/null || true
+              PUB_KEY="$("$SP_DIR"/generate_keys -p /tmp/priv.key 2>/dev/null || true)"
+              if [[ -n "$PUB_KEY" ]]; then
+                /usr/libexec/PlistBuddy -c "Set :SUPublicEDKey ${PUB_KEY}" \
+                  Sources/ProfilePilot/Resources/Info.plist
+                echo "::notice::Sparkle public key injected."
+              fi
+            fi
+          fi
+
+      - name: Build, sign, notarise, package, audit
+        env:
+          DEVELOPER_ID_APPLICATION: ${{ secrets.DEVELOPER_ID_APPLICATION }}
+          DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM }}
+          MARKETING_VERSION: ${{ steps.ver.outputs.version }}
+        run: ./scripts/release.sh
+
+      - name: Sign Sparkle update ZIP
+        if: ${{ env.SPARKLE_ED_PRIVATE_KEY != '' }}
+        env:
+          SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
+        run: |
+          echo "$SPARKLE_ED_PRIVATE_KEY" > /tmp/sparkle_priv.key
+          if [[ -x Sparkle/bin/sign_update ]]; then
+            ZIP=$(ls build/ProfilePilot-*.zip | head -n1)
+            Sparkle/bin/sign_update -f /tmp/sparkle_priv.key "$ZIP" | tee build/sparkle-signature.txt
+          fi
+          rm -f /tmp/sparkle_priv.key
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ProfilePilot-${{ steps.ver.outputs.version }}
+          path: |
+            ProfilePilot/build/*.dmg
+            ProfilePilot/build/*.zip
+            ProfilePilot/build/appcast-entry.xml
+            ProfilePilot/build/sparkle-signature.txt
+            ProfilePilot/build/audit-report.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ProfilePilot ${{ steps.ver.outputs.version }}
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            ProfilePilot/build/ProfilePilot-*.dmg
+            ProfilePilot/build/ProfilePilot-*.zip
+            ProfilePilot/build/appcast-entry.xml
+            ProfilePilot/build/sparkle-signature.txt
+            ProfilePilot/build/audit-report.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
