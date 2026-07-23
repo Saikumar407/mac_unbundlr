@@ -86,3 +86,10 @@ android-sdk/
 credentials.json
 *.key
 .credentials
+
+# --- Un-ignore committed example / template files that document the shape of
+# secrets without containing any (these must be pushed so `bootstrap.sh` works
+# on a fresh clone).
+!ProfilePilot/scripts/.env.local.example
+!**/.env.example
+!**/.env.*.example

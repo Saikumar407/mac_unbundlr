@@ -45,12 +45,8 @@ python3 -m pip install --quiet --upgrade pip cairosvg Pillow >/dev/null
 ok "Icon-gen deps present"
 
 section "scripts/.env.local"
-if [[ ! -f "${REPO_ROOT}/scripts/.env.local" ]]; then
-  cp "${REPO_ROOT}/scripts/.env.local.example" "${REPO_ROOT}/scripts/.env.local"
-  ok "Created scripts/.env.local from the template. Fill in your Apple Developer values."
-else
-  ok "scripts/.env.local already exists"
-fi
+"${DIR}/ensure-env-local.sh"
+ok "scripts/.env.local ready — fill in your Apple values before releasing."
 
 section "Sparkle keys"
 KEYCHAIN_ITEM_LABEL="ProfilePilot Sparkle EdDSA Private Key"
